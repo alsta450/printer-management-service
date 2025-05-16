@@ -1,7 +1,7 @@
 package com.maas.printer_management_service.printers.controller;
 
 import com.maas.api.CustomerApi;
-import com.maas.model.Location;
+import com.maas.model.GetAllPrinters200Response;
 import com.maas.model.Printer;
 import com.maas.model.RegisterPrinterRequest;
 import com.maas.model.RegisterPrinterResponse;
@@ -27,14 +27,18 @@ public class PrinterController implements CustomerApi {
     }
 
 
+
+
     @Override
     public ResponseEntity<RegisterPrinterResponse> registerPrinter(String customerId, RegisterPrinterRequest registerPrinterRequest) {
         return printerService.registerPrinter(customerId, registerPrinterRequest);
     }
 
     @Override
-    public ResponseEntity<List<Printer>> getAllPrintersByCustomer(String customerId) {
+    public ResponseEntity<GetAllPrinters200Response> getAllPrintersByCustomer(String customerId) {
         List<Printer> printers = printerService.getAllPrintersByCustomer(customerId);
-        return ResponseEntity.ok(printers);
+        return ResponseEntity.ok(new GetAllPrinters200Response()
+                .printers(printers)
+        );
     }
 }

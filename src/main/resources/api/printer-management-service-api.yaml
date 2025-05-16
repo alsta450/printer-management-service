@@ -17,9 +17,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Printer'
+                type: object
+                properties:
+                  printers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Printer'
 
   /customer/{customerId}/printers:
     get:
@@ -37,9 +40,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Printer'
+                type: object
+                properties:
+                  printers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Printer'
 
   /customer/{customerId}/printers/register:
     post:

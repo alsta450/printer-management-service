@@ -71,4 +71,8 @@ public class PrinterService {
 
         return ResponseEntity.ok(response);
     }
+
+    public List<Printer> getAllPrinters() {
+        return printerMapper.toPrinterResponseList(printerRepository.findAll());
+    }
 }
