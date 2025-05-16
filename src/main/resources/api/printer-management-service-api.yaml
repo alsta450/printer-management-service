@@ -1,0 +1,450 @@
+openapi: 3.0.3
+info:
+  title: OctoPrint Printer API
+  version: 1.0.0
+  description: API to interact with OctoPrint printers in a multi-printer/multi-customer environment.
+servers:
+  - url: http://192.168.0.212
+
+paths:
+  /printers:
+    get:
+      summary: List all printers
+      operationId: getAllPrinters
+      responses:
+        '200':
+          description: List of printers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Printer'
+
+  /customer/{customerId}/printers:
+    get:
+      summary: List all printers for customer
+      operationId: getAllPrintersByCustomer
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of printers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Printer'
+
+  /customer/{customerId}/printers/register:
+    post:
+      summary: Register a printer for a customer
+      operationId: registerPrinter
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPrinterRequest'
+      responses:
+        '200':
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterPrinterResponse'
+
+  /customer/{customerId}/printers/{printerId}/status:
+    get:
+      summary: Get printer status
+      operationId: getPrinterStatus
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Printer status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrinterStatus'
+
+  /customer/{customerId}/printers/{printerId}/files:
+    post:
+      summary: Upload a G-code file
+      operationId: uploadFile
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileUploadRequest'
+      responses:
+        '200':
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploadResponse'
+
+  /customer/{customerId}/printers/{printerId}/folders:
+    post:
+      summary: Create a folder
+      operationId: createFolder
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateFolderRequest'
+      responses:
+        '200':
+          description: Folder created
+
+  /customer/{customerId}/printers/{printerId}/jobs:
+    get:
+      summary: Get current print job info
+      operationId: getCurrentJob
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrintJobStatus'
+
+    post:
+      summary: Start a print job
+      operationId: startPrintJob
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartPrintJobRequest'
+      responses:
+        '200':
+          description: Job started
+
+  /customer/{customerId}/printers/{printerId}/connect:
+    post:
+      summary: Connect or disconnect printer
+      operationId: handleConnect
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectRequest'
+      responses:
+        '204':
+          description: Connected successfully
+
+  /customer/{customerId}/printers/{printerId}/connection:
+    get:
+      summary: Get connection status
+      operationId: getConnectionStatus
+      parameters:
+        - in: path
+          name: printerId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current connection details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionStatus'
+
+components:
+  schemas:
+    PrinterStatus:
+      type: object
+      properties:
+        sd:
+          type: object
+          properties:
+            ready:
+              type: boolean
+              example: false
+        state:
+          type: object
+          properties:
+            error:
+              type: string
+              example: ""
+            flags:
+              type: object
+              properties:
+                cancelling:
+                  type: boolean
+                  example: false
+                operational:
+                  type: boolean
+                  example: true
+            text:
+              type: string
+              example: "Operational"
+
+    FileUploadRequest:
+      type: object
+      properties:
+        path:
+          type: string
+          example: "folder/"
+        file:
+          type: string
+          format: binary
+
+    FileUploadResponse:
+      type: object
+      properties:
+        done:
+          type: boolean
+          example: true
+        files:
+          type: object
+          properties:
+            local:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Luna_0.3mm_PLA_MK3_1h37m.gcode"
+                origin:
+                  type: string
+                  example: "local"
+                path:
+                  type: string
+                  example: "folder/Luna_0.3mm_PLA_MK3_1h37m.gcode"
+
+    CreateFolderRequest:
+      type: object
+      properties:
+        foldername:
+          type: string
+          example: "newFolder"
+
+    PrintJobStatus:
+      type: object
+      properties:
+        job:
+          type: object
+          properties:
+            estimatedPrintTime:
+              type: number
+              nullable: true
+            file:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: true
+        progress:
+          type: object
+          properties:
+            completion:
+              type: number
+              nullable: true
+        state:
+          type: string
+          example: "Offline"
+
+    StartPrintJobRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          example: "start"
+
+    ConnectRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          example: "connect"
+
+    ConnectionStatus:
+      type: object
+      properties:
+        current:
+          type: object
+          properties:
+            baudrate:
+              type: integer
+              example: 115200
+            port:
+              type: string
+              example: "/dev/ttyACM0"
+            state:
+              type: string
+              example: "Operational"
+        options:
+          type: object
+          properties:
+            baudrates:
+              type: array
+              items:
+                type: integer
+            ports:
+              type: array
+              items:
+                type: string
+    RegisterPrinterRequest:
+      type: object
+      properties:
+        printerName:
+          type: string
+          example: "Prusa MK4S"
+        printerMaterial:
+          type: array
+          items:
+              type: string
+              example: "PLA"
+        printerModel:
+          type: string
+          example: "MK4S"
+        location:
+          $ref: '#/components/schemas/Location'
+        ipAddress:
+          type: string
+          example: "192.168.1.1"
+        apiKey:
+          type: string
+          example: "your_api_key_here"
+    RegisterPrinterResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: true
+          message:
+            type: string
+            example: "Printer registered successfully"
+          printerId:
+            type: string
+            example: "printer1"
+    Printer:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        name:
+          type: string
+          example: "Prusa MK4S"
+        model:
+          type: string
+          example: "MK4S"
+        material:
+          type: array
+          items:
+            type: string
+            example: "PLA"
+        location:
+          $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+              example: "123 Main St"
+            city:
+              type: string
+              example: "San Francisco"
+            state:
+              type: string
+              example: "CA"
+            zip:
+              type: string
+              example: "94103"
+        latitude:
+          type: number
+          example: 37.7749
+        longitude:
+          type: number
+          example: -122.4194
