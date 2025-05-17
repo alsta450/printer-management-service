@@ -26,6 +26,9 @@ public class PrinterEntity {
     @Embedded
     private Location location;
 
+    @Embedded
+    private Dimensions dimensions;
+
     public String getId() {
         return id;
     }
@@ -98,5 +101,13 @@ public class PrinterEntity {
                 ", material=" + material +
                 ", location=" + location +
                 '}';
+    }
+
+    public Dimensions getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(Dimensions dimensions) {
+        this.dimensions = dimensions;
     }
 }

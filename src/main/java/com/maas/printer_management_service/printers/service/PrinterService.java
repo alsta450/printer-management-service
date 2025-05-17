@@ -3,7 +3,10 @@ package com.maas.printer_management_service.printers.service;
 import com.maas.model.Printer;
 import com.maas.model.RegisterPrinterRequest;
 import com.maas.model.RegisterPrinterResponse;
+import com.maas.printer_management_service.printers.client.pinter_management.model.OctoPrintClient;
+import com.maas.printer_management_service.printers.client.pinter_management.model.PrinterProfiles;
 import com.maas.printer_management_service.printers.mapping.PrinterMapper;
+import com.maas.printer_management_service.printers.model.Dimensions;
 import com.maas.printer_management_service.printers.model.PrinterEntity;
 import com.maas.printer_management_service.printers.repository.PrinterRepository;
 import org.springframework.http.*;
@@ -18,13 +21,15 @@ public class PrinterService {
 
     private final PrinterRepository printerRepository;
     private final PrinterMapper printerMapper;
+    private final OctoPrintClient octoPrintClient;
 
     private static final String API_KEY = "27qi5Ym2THMviJB8MPblbJcIUvKnvmam6ifIZ7sXSI4";
     private static final String OCTOPRINT_URL = "http://192.168.0.212/api/version";
 
-    public PrinterService(PrinterRepository printerRepository, PrinterMapper printerMapper) {
+    public PrinterService(PrinterRepository printerRepository, PrinterMapper printerMapper, OctoPrintClient octoPrintClient) {
         this.printerRepository = printerRepository;
         this.printerMapper = printerMapper;
+        this.octoPrintClient = octoPrintClient;
     }
 
     public String getVersion() {
@@ -63,6 +68,19 @@ public class PrinterService {
         System.out.println(printerEntity);
 
         PrinterEntity savedPrinter = printerRepository.save(printerEntity);
+
+        octoPrintClient.handlePrinterConnection("connect", savedPrinter.getId());
+
+        PrinterProfiles printerProfiles = octoPrintClient.getPrinterProfiles(savedPrinter.getId());
+
+        savedPrinter.setDimensions(
+                new Dimensions(
+                        printerProfiles.getProfiles().get("_default").getVolume().getWidth(),
+                        printerProfiles.getProfiles().get("_default").getVolume().getHeight(),
+                        printerProfiles.getProfiles().get("_default").getVolume().getDepth()
+                )
+
+        );
 
         RegisterPrinterResponse response = new RegisterPrinterResponse();
         response.setSuccess(true);

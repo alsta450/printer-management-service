@@ -26,9 +26,6 @@ public class PrinterController implements CustomerApi {
         return printerService.getVersion();
     }
 
-
-
-
     @Override
     public ResponseEntity<RegisterPrinterResponse> registerPrinter(String customerId, RegisterPrinterRequest registerPrinterRequest) {
         return printerService.registerPrinter(customerId, registerPrinterRequest);
