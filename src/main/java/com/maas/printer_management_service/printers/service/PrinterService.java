@@ -82,6 +82,8 @@ public class PrinterService {
 
         );
 
+        savedPrinter = printerRepository.save(savedPrinter);
+
         RegisterPrinterResponse response = new RegisterPrinterResponse();
         response.setSuccess(true);
         response.setMessage("Printer registered successfully");

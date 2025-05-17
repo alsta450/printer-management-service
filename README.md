@@ -1,0 +1,1 @@
+- [OpenAPI spec (YAML)](/src/main/resources/api/printer-management-service-api.yaml)
